@@ -1,0 +1,325 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                 String          @id @default(uuid())
+  username           String          @unique
+  email              String          @unique
+  passwordHash       String
+  displayName        String
+  avatarUrl          String?
+  bio                String?
+  role               String          @default("USER") // USER, AUTHOR, MODERATOR, ADMIN
+  favoriteGenres     String?         @default("Horror,Survival")
+  preferredPlatforms String?         @default("PC,PlayStation 5")
+  isVerified         Boolean         @default(false)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  blogs              BlogArticle[]
+  reviews            Review[]
+  comments           Comment[]
+  savedGames         SavedGame[]
+  bookmarks          Bookmark[]
+  reactions          Reaction[]
+  helpfulVotes       ReviewHelpfulVote[]
+  reportsSubmitted   ContentReport[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+}
+
+model Game {
+  id                String                 @id @default(uuid())
+  slug              String                 @unique
+  title             String
+  tagline           String?
+  shortDescription  String
+  fullDescription   String
+  coverImage        String
+  heroImage         String?
+  trailerUrl        String?
+  genre             String                 // Primary genre: Horror, Action, Survival, etc.
+  genres            String                 // Comma-separated: "Horror, Survival, Psychological Horror"
+  tags              String?                // Comma-separated: "Zombies, Atmospheric, Sci-Fi"
+  releaseDate       DateTime
+  isUpcoming        Boolean                @default(false)
+  developer         String
+  publisher         String
+  platforms         String                 // Comma-separated: "PC, PS5, Xbox Series X, Android, iOS"
+  supportedOS       String                 // Comma-separated: "Windows, macOS, Linux, Android, iOS"
+  gameModes         String                 @default("Singleplayer") // Singleplayer, Co-op, Multiplayer
+  playerCount       String?                @default("1 Player")
+  ageRating         String?                @default("Mature 17+")
+  languageSupport   String?                @default("English, Japanese, French, German, Spanish")
+  
+  // System Requirements
+  minCpu            String?
+  minGpu            String?
+  minRam            String?
+  minStorage        String?
+  recCpu            String?
+  recGpu            String?
+  recRam            String?
+  recStorage        String?
+  
+  // Commercial details
+  price             Float?                 @default(0)
+  isFreeToPlay      Boolean                @default(false)
+  currency          String?                @default("USD")
+  officialWebsite   String?
+  verifiedStatus    Boolean                @default(true)
+  dataSource        String                 @default("Official Publisher & Verified Storefronts")
+  
+  // Editorial & Ratings
+  rating            Float                  @default(0)
+  ratingCount       Int                    @default(0)
+  pros              String?                // JSON or semicolon separated
+  cons              String?
+  isFeatured        Boolean                @default(false)
+  isTrending        Boolean                @default(false)
+  isEditorPick      Boolean                @default(false)
+
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  downloadLinks     OfficialDownloadLink[]
+  screenshots       GameScreenshot[]
+  characters        GameCharacter[]
+  news              NewsArticle[]
+  blogs             BlogArticle[]
+  reviews           Review[]
+  savedBy           SavedGame[]
+}
+
+model OfficialDownloadLink {
+  id          String   @id @default(uuid())
+  gameId      String
+  platform    String   // PC, Steam, Epic Games, GOG, Android, iOS, Official Direct
+  storeName   String   // "Steam", "Epic Games Store", "Google Play", "PlayStation Store"
+  url         String
+  isVerified  Boolean  @default(true)
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model GameScreenshot {
+  id        String   @id @default(uuid())
+  gameId    String
+  imageUrl  String
+  caption   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model GameCharacter {
+  id              String   @id @default(uuid())
+  slug            String   @unique
+  name            String
+  portraitUrl     String
+  gameId          String
+  gameTitle       String
+  role            String   // Protagonist, Antagonist, Survivor, Monster, Deity
+  characterClass  String?
+  species         String?
+  abilities       String?
+  weapons         String?
+  backstory       String
+  personality     String?
+  relationships   String?
+  firstAppearance String?
+  keyEvents       String?
+  strengths       String?
+  weaknesses      String?
+  trivia          String?
+  hasSpoilers     Boolean  @default(false)
+  sources         String?  @default("Official Lore Archive")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  game            Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model NewsArticle {
+  id              String   @id @default(uuid())
+  slug            String   @unique
+  title           String
+  subtitle        String?
+  coverImage      String
+  content         String
+  authorName      String   @default("AFTERDARK Editorial")
+  authorRole      String   @default("Senior Horror Games Editor")
+  gameId          String?
+  tags            String?
+  readTimeMinutes Int      @default(4)
+  sourceUrl       String?
+  isPublished     Boolean  @default(true)
+  publishedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  game            Game?    @relation(fields: [gameId], references: [id], onDelete: SetNull)
+}
+
+model BlogArticle {
+  id              String      @id @default(uuid())
+  slug            String      @unique
+  title           String
+  subtitle        String?
+  coverImage      String
+  content         String
+  category        String      // Reviews, Gaming News, Guides and Walkthroughs, Character Analysis, Horror Game Stories, Gaming Opinion, Tips and Tricks, Upcoming Releases, Gaming Technology
+  tags            String?
+  readTimeMinutes Int         @default(5)
+  authorId        String
+  gameId          String?
+  status          String      @default("PUBLISHED") // DRAFT, SUBMITTED, PUBLISHED, REJECTED
+  rejectionReason String?
+  viewsCount      Int         @default(0)
+  likesCount      Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  author          User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  game            Game?       @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  comments        Comment[]
+  bookmarks       Bookmark[]
+  reactions       Reaction[]
+}
+
+model Review {
+  id                 String              @id @default(uuid())
+  gameId             String
+  userId             String
+  rating             Int                 // 1 - 10
+  title              String
+  body               String
+  platformPlayed     String              // PC, PS5, Xbox Series X, Mobile, etc.
+  playTimeHours      Float?
+  hasSpoilers        Boolean             @default(false)
+  isVerifiedPurchase Boolean             @default(false)
+  helpfulCount       Int                 @default(0)
+  isModerated        Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  game               Game                @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  helpfulVotes       ReviewHelpfulVote[]
+
+  @@unique([gameId, userId])
+}
+
+model ReviewHelpfulVote {
+  id        String   @id @default(uuid())
+  reviewId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+}
+
+model Comment {
+  id          String      @id @default(uuid())
+  blogId      String
+  userId      String
+  content     String
+  isModerated Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  blog        BlogArticle @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Reaction {
+  id        String      @id @default(uuid())
+  blogId    String
+  userId    String
+  type      String      // LIKE, SKULL, FIRE, HEART
+  createdAt DateTime    @default(now())
+
+  blog      BlogArticle @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([blogId, userId, type])
+}
+
+model SavedGame {
+  id        String   @id @default(uuid())
+  userId    String
+  gameId    String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+}
+
+model Bookmark {
+  id        String      @id @default(uuid())
+  userId    String
+  blogId    String
+  createdAt DateTime    @default(now())
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blog      BlogArticle @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blogId])
+}
+
+model ContentReport {
+  id                String   @id @default(uuid())
+  reportedByUserId  String
+  contentType       String   // BLOG, REVIEW, COMMENT
+  contentId         String
+  reason            String
+  status            String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
+  notes             String?
+  createdAt         DateTime @default(now())
+
+  reportedBy        User     @relation(fields: [reportedByUserId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SiteSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

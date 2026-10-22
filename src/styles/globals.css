@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #040306;
+  --foreground: #e2e8f0;
+  --blood: #ff1c2f;
+  --blood-glow: rgba(255, 28, 47, 0.45);
+  --charcoal: #0c0b11;
+  --panel: #110f17;
+  --panel-border: #262132;
+}
+
+/* Base Body Horror Theme */
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-inter, system-ui, -apple-system, sans-serif);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Custom Horror Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070609;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #231f2b;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 28, 47, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8a030f;
+  box-shadow: 0 0 10px rgba(255, 28, 47, 0.5);
+}
+
+/* Scanline Effect */
+.scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.35) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+}
+
+/* Atmospheric Red Light Leak */
+.red-light-leak {
+  background: radial-gradient(
+    circle at 50% -20%,
+    rgba(255, 28, 47, 0.15) 0%,
+    rgba(138, 3, 15, 0.05) 40%,
+    transparent 70%
+  );
+}
+
+/* Fog Overlay Layer */
+.fog-layer {
+  background: radial-gradient(
+    ellipse at bottom,
+    rgba(255, 28, 47, 0.08) 0%,
+    rgba(20, 16, 26, 0.4) 40%,
+    transparent 80%
+  );
+  pointer-events: none;
+}
+
+/* Glitch Heading Effect */
+.glitch-title {
+  position: relative;
+  text-shadow: 0 0 20px rgba(255, 28, 47, 0.5);
+}
+
+.glitch-title::before,
+.glitch-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  clip: rect(0, 0, 0, 0);
+}
+
+.glitch-title:hover::before {
+  left: -2px;
+  text-shadow: 2px 0 #00ff87;
+  animation: glitch-anim-1 2s infinite linear alternate-reverse;
+}
+
+.glitch-title:hover::after {
+  left: 2px;
+  text-shadow: -2px 0 #ff1c2f;
+  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+  0% { clip: rect(20px, 9999px, 44px, 0); }
+  25% { clip: rect(62px, 9999px, 88px, 0); }
+  50% { clip: rect(12px, 9999px, 34px, 0); }
+  75% { clip: rect(80px, 9999px, 100px, 0); }
+  100% { clip: rect(40px, 9999px, 60px, 0); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip: rect(42px, 9999px, 78px, 0); }
+  25% { clip: rect(10px, 9999px, 30px, 0); }
+  50% { clip: rect(74px, 9999px, 96px, 0); }
+  75% { clip: rect(28px, 9999px, 52px, 0); }
+  100% { clip: rect(90px, 9999px, 110px, 0); }
+}
+
+/* Focus Visibility for Accessibility */
+*:focus-visible {
+  outline: 2px solid #ff1c2f;
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Mode Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.reduce-motion *,
+.reduce-motion ::before,
+.reduce-motion ::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Subtle Film Grain Noise Pattern */
+.bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+}
