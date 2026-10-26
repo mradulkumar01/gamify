@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: afterdark_gaming_abyss
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:./dev.db
+      - JWT_SECRET=afterdark-production-secret-key-replace-with-random-32-chars
+      - NEXT_PUBLIC_APP_NAME=AFTERDARK — THE GAMING ABYSS
+      - NEXT_PUBLIC_APP_TAGLINE=ENTER THE UNKNOWN. PLAY BEYOND FEAR.
+      - NEXT_PUBLIC_APP_ALT_TAGLINE=EVERY GAME HAS A DARK SIDE.
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - NEXT_PUBLIC_OWNER_NAME=MRADUL KUMAR
+      - NEXT_PUBLIC_OWNER_ROLE=Founder, Creator & Developer
+      - NEXT_PUBLIC_OWNER_GITHUB=https://github.com/mradulkumar01
+      - NEXT_PUBLIC_OWNER_LINKEDIN=https://linkedin.com/in/mradul-kumar0001
+    volumes:
+      - db_data:/app/prisma
+
+volumes:
+  db_data:
